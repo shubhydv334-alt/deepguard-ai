@@ -119,13 +119,73 @@ export default function UploadAnalysis() {
         }, 100)
 
         try {
-            // Create image element for analysis
-            const img = new Image()
-            img.src = URL.createObjectURL(file)
-            await new Promise(r => img.onload = r)
+            const aiModule = await import('../utils/aiEngine')
+            await aiModule.loadModels()
 
-            // Run AI Analysis
-            const aiResults = await import('../utils/aiEngine').then(mod => mod.analyzeImage(img))
+            let imgForAnalysis
+
+            if (file.type.startsWith('video/')) {
+                // --- VIDEO: extract a frame ---
+                imgForAnalysis = await new Promise((resolve, reject) => {
+                    const video = document.createElement('video')
+                    video.muted = true
+                    video.playsInline = true
+                    video.preload = 'auto'
+                    const objectUrl = URL.createObjectURL(file)
+                    video.src = objectUrl
+
+                    const timeout = setTimeout(() => {
+                        URL.revokeObjectURL(objectUrl)
+                        reject(new Error('Video frame extraction timed out'))
+                    }, 15000)
+
+                    video.onloadeddata = () => {
+                        // Seek to 1 second or midpoint for a good frame
+                        video.currentTime = Math.min(1, video.duration / 2)
+                    }
+
+                    video.onseeked = () => {
+                        clearTimeout(timeout)
+                        const canvas = document.createElement('canvas')
+                        canvas.width = video.videoWidth
+                        canvas.height = video.videoHeight
+                        const ctx = canvas.getContext('2d')
+                        ctx.drawImage(video, 0, 0)
+
+                        const img = new Image()
+                        img.onload = () => {
+                            URL.revokeObjectURL(objectUrl)
+                            resolve(img)
+                        }
+                        img.onerror = () => {
+                            URL.revokeObjectURL(objectUrl)
+                            reject(new Error('Failed to create image from video frame'))
+                        }
+                        img.src = canvas.toDataURL('image/png')
+                    }
+
+                    video.onerror = () => {
+                        clearTimeout(timeout)
+                        URL.revokeObjectURL(objectUrl)
+                        reject(new Error('Failed to load video'))
+                    }
+                })
+            } else {
+                // --- IMAGE: direct load ---
+                imgForAnalysis = await new Promise((resolve, reject) => {
+                    const img = new Image()
+                    const objectUrl = URL.createObjectURL(file)
+                    img.onload = () => resolve(img)
+                    img.onerror = () => {
+                        URL.revokeObjectURL(objectUrl)
+                        reject(new Error('Failed to load image'))
+                    }
+                    img.src = objectUrl
+                })
+            }
+
+            // Run AI Analysis on the image (or video frame)
+            const aiResults = await aiModule.analyzeImage(imgForAnalysis)
 
             clearInterval(interval)
             setProgress(100)
@@ -157,10 +217,19 @@ export default function UploadAnalysis() {
             }
 
         } catch (error) {
-            console.error(error)
+            console.error('Analysis failed:', error)
             clearInterval(interval)
+            setProgress(100)
             setAnalyzing(false)
-            // Fallback to error results or mock
+
+            // Fallback results so the UI doesn't hang
+            setResults({
+                overall: '—',
+                scores: { 'Analysis': 0 },
+                isDeepfake: false,
+                detections: [],
+                error: error.message,
+            })
         }
     }
 
