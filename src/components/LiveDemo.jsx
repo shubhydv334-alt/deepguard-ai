@@ -40,7 +40,11 @@ export default function LiveDemo() {
                 prevLandmarksRef.current = null
                 blinkRef.current = { count: 0, closedFrames: 0, totalFrames: 0 }
                 frameCountRef.current = 0
-                detectFaces()
+
+                // Wait for video to actually start playing before detection
+                videoRef.current.onplaying = () => {
+                    detectFaces()
+                }
             }
         } catch (err) {
             console.error(err)
@@ -121,19 +125,26 @@ export default function LiveDemo() {
     }
 
     const detectFaces = async () => {
-        if (!videoRef.current || !canvasRef.current || videoRef.current.paused || videoRef.current.ended) return
+        if (!videoRef.current || !canvasRef.current) return
 
         const ai = await import('../utils/aiEngine')
         const canvas = canvasRef.current
         const video = videoRef.current
 
-        if (canvas.width !== video.videoWidth) {
-            canvas.width = video.videoWidth
-            canvas.height = video.videoHeight
-        }
-
         const detect = async () => {
             if (!video || !video.srcObject) return
+
+            // Wait until video has dimensions
+            if (video.videoWidth === 0 || video.videoHeight === 0) {
+                animRef.current = requestAnimationFrame(detect)
+                return
+            }
+
+            // Sync canvas size with video
+            if (canvas.width !== video.videoWidth) {
+                canvas.width = video.videoWidth
+                canvas.height = video.videoHeight
+            }
 
             const detections = await ai.analyzeVideoFrame(video)
 
