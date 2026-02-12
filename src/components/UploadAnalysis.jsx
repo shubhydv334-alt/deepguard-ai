@@ -95,9 +95,8 @@ export default function UploadAnalysis() {
         if (!f) return
         setFile(f)
         setResults(null)
-        const reader = new FileReader()
-        reader.onload = (e) => setPreview(e.target.result)
-        reader.readAsDataURL(f)
+        // Use object URL for preview — much faster than readAsDataURL for videos
+        setPreview(URL.createObjectURL(f))
     }, [])
 
     const handleDrop = useCallback((e) => {
@@ -136,10 +135,12 @@ export default function UploadAnalysis() {
 
                     const timeout = setTimeout(() => {
                         URL.revokeObjectURL(objectUrl)
+                        console.warn('Video frame extraction timed out')
                         reject(new Error('Video frame extraction timed out'))
                     }, 15000)
 
                     video.onloadeddata = () => {
+                        console.log('Video loaded, seeking to frame...')
                         // Seek to 1 second or midpoint for a good frame
                         video.currentTime = Math.min(1, video.duration / 2)
                     }
@@ -266,6 +267,7 @@ export default function UploadAnalysis() {
     }
 
     const reset = () => {
+        if (preview) URL.revokeObjectURL(preview)
         setFile(null)
         setPreview(null)
         setResults(null)
