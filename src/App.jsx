@@ -6,6 +6,9 @@ import HowItWorks from './components/HowItWorks'
 import UploadAnalysis from './components/UploadAnalysis'
 import UrlScanner from './components/UrlScanner'
 import LiveDemo from './components/LiveDemo'
+import BatchAnalysis from './components/BatchAnalysis'
+import ComparisonMode from './components/ComparisonMode'
+import ScanHistory from './components/ScanHistory'
 import Stats from './components/Stats'
 import Team from './components/Team'
 import Footer from './components/Footer'
@@ -36,9 +39,13 @@ export default function App() {
             <UploadAnalysis />
             <UrlScanner />
             <LiveDemo />
+            <BatchAnalysis />
+            <ComparisonMode />
+            <ScanHistory />
             <Stats />
             <Team />
             <Footer />
         </>
     )
 }
+

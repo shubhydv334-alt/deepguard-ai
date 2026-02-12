@@ -16,7 +16,9 @@ export default function Navbar() {
         { label: 'How It Works', href: '#how-it-works' },
         { label: 'Analyze', href: '#analyze' },
         { label: 'Live Demo', href: '#live-demo' },
-        { label: 'Stats', href: '#stats' },
+        { label: 'Batch', href: '#batch' },
+        { label: 'Compare', href: '#compare' },
+        { label: 'History', href: '#history' },
     ]
 
     return (

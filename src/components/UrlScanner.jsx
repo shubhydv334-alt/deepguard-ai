@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import VerificationProof from './VerificationProof'
+import { saveResult } from '../utils/historyStore'
 import './UrlScanner.css'
 
 export default function UrlScanner() {
@@ -27,6 +28,16 @@ export default function UrlScanner() {
             setProgress(100)
             setScanning(false)
             setResults([result, ...results].slice(0, 5))
+
+            // Save to history
+            saveResult({
+                source: 'url',
+                url: url,
+                score: result.verdict === 'suspicious' ? result.score : 100 - result.score,
+                isManipulated: result.verdict === 'suspicious',
+            })
+            window.dispatchEvent(new Event('deepguard-scan-complete'))
+
             setUrl('')
         } catch (err) {
             console.error(err)
