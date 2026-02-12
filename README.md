@@ -1,7 +1,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/React-18.2-61dafb?style=flat-square&logo=react" />
   <img src="https://img.shields.io/badge/Vite-5.4-646cff?style=flat-square&logo=vite" />
-  <img src="https://img.shields.io/badge/License-MIT-c5f82a?style=flat-square" />
+  
   <img src="https://img.shields.io/badge/Status-Prototype-c5f82a?style=flat-square" />
 </p>
 
@@ -162,20 +162,15 @@ Every scan generates a **Verification Certificate** containing:
 
 ## 👥 Team
 
-| Name | Role |
+| Name | 
 |---|---|
-| **Dr. Alex Rivera** | CEO & Co-Founder — Former MIT Media Lab |
-| **Dr. Maya Zhang** | Chief AI Officer — Ex-Google DeepMind |
-| **James Okonkwo** | CTO — Ex-Cloudflare, AWS |
-| **Sarah Li** | Head of Product — Ex-Meta, Twitter |
+| **ved rane ** | 
+| **shubham yadav ** | 
+| **sushant zanwar** |
 
 ---
 
-## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
-
----
 
 <p align="center">
   <strong>DeepGuard AI</strong> — Protecting truth in the age of synthetic media.
