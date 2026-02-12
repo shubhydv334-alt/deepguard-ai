@@ -1,0 +1,143 @@
+.footer {
+    background: var(--bg-primary);
+    position: relative;
+    padding-top: 80px;
+    overflow: hidden;
+}
+
+.footer__gradient-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.footer__top {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1.5fr;
+    gap: 40px;
+    margin-bottom: 60px;
+}
+
+.footer__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.footer__logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-primary);
+}
+
+.footer__tagline {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    max-width: 300px;
+}
+
+.footer__socials {
+    display: flex;
+    gap: 16px;
+}
+
+.footer__social-link {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    /* Boxy */
+    color: var(--text-muted);
+    transition: var(--transition-fast);
+}
+
+.footer__social-link:hover {
+    background: var(--accent);
+    color: var(--text-dark);
+}
+
+.footer__links-group h4 {
+    color: var(--text-primary);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.footer__links-group a {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    transition: var(--transition-fast);
+}
+
+.footer__links-group a:hover {
+    color: var(--accent);
+    transform: translateX(4px);
+}
+
+/* === Matiks-Style Lavender Bottom Banner === */
+.footer__bottom-banner {
+    background: var(--bg-lavender);
+    /* Lavender signature */
+    color: var(--text-dark);
+    /* Dark text on lavender */
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.footer__bottom-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.footer__bottom-links-wrap {
+    display: flex;
+    gap: 32px;
+}
+
+.footer__bottom-link {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.footer__bottom-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+    .footer__top {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .footer__top {
+        grid-template-columns: 1fr;
+    }
+
+    .footer__bottom-banner {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+}

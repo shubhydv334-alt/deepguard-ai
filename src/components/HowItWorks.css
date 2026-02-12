@@ -1,0 +1,128 @@
+.how-it-works {
+    background: var(--bg-primary);
+    position: relative;
+    padding-bottom: 120px;
+}
+
+.hiw__timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--grid-gap-lg);
+    position: relative;
+    padding-top: 40px;
+}
+
+/* Connecting line - Matiks Neon */
+.hiw__line {
+    position: absolute;
+    top: 60px;
+    /* Center of the number box */
+    left: 12%;
+    right: 12%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+    z-index: 0;
+}
+
+.hiw__step {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.hiw__step-number {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    /* Boxy */
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+    transition: var(--transition-smooth);
+    position: relative;
+}
+
+.hiw__step:hover .hiw__step-number {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+    box-shadow: 0 0 20px rgba(197, 248, 42, 0.2);
+}
+
+.hiw__step-number span {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+}
+
+.hiw__step:hover .hiw__step-number span {
+    color: var(--accent);
+}
+
+.hiw__step-content {
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-sm);
+    padding: 32px 24px;
+    width: 100%;
+    transition: var(--transition-smooth);
+}
+
+.hiw__step:hover .hiw__step-content {
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-4px);
+}
+
+.hiw__step-icon {
+    color: var(--accent);
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.hiw__step:hover .hiw__step-icon {
+    animation: pulse 2s infinite;
+}
+
+.hiw__step-content h3 {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    margin-bottom: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+}
+
+.hiw__step-content p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+    .hiw__timeline {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .hiw__line {
+        display: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .hiw__timeline {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}
