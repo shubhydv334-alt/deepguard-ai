@@ -22,7 +22,6 @@
     aspect-ratio: 4/3;
     background: #000;
     border-radius: var(--radius-md);
-    /* Boxy */
     overflow: hidden;
     margin-bottom: 20px;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -36,7 +35,6 @@
     display: block;
     transform: scaleX(-1);
     opacity: 0.8;
-    /* Slight dim to pop UI */
 }
 
 .live-demo__canvas {
@@ -121,111 +119,239 @@
     gap: 24px;
 }
 
-.live-demo__score-card {
-    background: var(--bg-card);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: var(--radius-md);
-    /* Boxy */
-    padding: 32px;
-    text-align: center;
+/* ============ HUD Overlay ============ */
+.ld__hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-.live-demo__score-header {
+.ld__hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.ld__hud-fps {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    background: rgba(0, 0, 0, 0.6);
+    padding: 3px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.5px;
+}
+
+.ld__hud-rec {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: #ff5252;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 3px 8px;
+    border-radius: 2px;
+    animation: pulse 1.5s ease-in-out infinite;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.ld__hud-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.ld__hud-faces {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--accent);
+    background: rgba(0, 0, 0, 0.6);
+    padding: 3px 8px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ld__hud-expr {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: #ff9100;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 3px 8px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ============ Metrics Panel ============ */
+.ld__metrics-panel {
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ld__mp-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    padding-bottom: 16px;
 }
 
-.live-demo__score-label {
+.ld__mp-header h4 {
     font-family: var(--font-display);
     font-size: 0.85rem;
-    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    font-weight: 700;
+    color: var(--text-primary);
 }
 
-.live-demo__status {
-    font-size: 0.75rem;
-    color: var(--text-muted);
+.ld__mp-status {
     font-family: var(--font-mono);
+    font-size: 0.65rem;
     text-transform: uppercase;
+    color: var(--text-muted);
     background: rgba(255, 255, 255, 0.05);
     padding: 4px 8px;
     border-radius: var(--radius-sm);
 }
 
-.live-demo__status--live {
+.ld__mp-status--live {
     color: var(--accent);
     background: var(--accent-dim);
     border: 1px solid rgba(197, 248, 42, 0.2);
     animation: pulse 2s ease-in-out infinite;
 }
 
-.live-demo__score-value {
-    font-family: var(--font-display);
-    font-size: 4.5rem;
-    font-weight: 700;
+/* Score Display */
+.ld__mp-score {
+    text-align: center;
     margin-bottom: 24px;
-    color: var(--accent);
+    position: relative;
+}
+
+.ld__mp-score-val {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    font-weight: 700;
     line-height: 1;
     text-shadow: 0 0 30px var(--accent-dim);
 }
 
-.live-demo__score-bar-bg {
-    width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: var(--radius-full);
+.ld__mp-score-pct {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    vertical-align: super;
+}
+
+.ld__mp-score-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+
+/* Factor Bars */
+.ld__mp-factors {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.ld__mp-factor-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.ld__mp-factor-name {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ld__mp-factor-val {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.ld__mp-bar {
+    height: 3px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
     overflow: hidden;
 }
 
-.live-demo__score-bar-fill {
+.ld__mp-bar-fill {
     height: 100%;
-    background: var(--accent);
-    box-shadow: 0 0 10px var(--accent);
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width 0.4s ease, background 0.4s ease;
+    border-radius: 2px;
 }
 
-/* Metrics Panel */
-.live-demo__metrics {
-    padding: 24px;
-    background: var(--bg-card);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: var(--radius-md);
+/* ============ Expressions ============ */
+.ld__expressions {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.live-demo__metrics h4 {
-    margin-bottom: 20px;
+.ld__expressions h5 {
     font-family: var(--font-display);
-    font-size: 0.9rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: var(--text-primary);
+    color: var(--text-muted);
+    margin-bottom: 12px;
 }
 
-.live-demo__metric {
+.ld__expr-row {
     display: flex;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    font-size: 0.85rem;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
     font-family: var(--font-mono);
+    font-size: 0.7rem;
 }
 
-.live-demo__metric:last-child {
-    border-bottom: none;
-}
-
-.live-demo__metric span:first-child {
+.ld__expr-row span:first-child {
+    width: 70px;
     color: var(--text-secondary);
+    text-transform: capitalize;
 }
 
-.live-demo__metric-value {
-    color: var(--accent);
+.ld__expr-bar {
+    flex: 1;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.ld__expr-fill {
+    height: 100%;
+    background: var(--accent-secondary);
+    box-shadow: 0 0 4px rgba(79, 70, 229, 0.4);
+    transition: width 0.3s ease;
+    border-radius: 2px;
+}
+
+.ld__expr-val {
+    width: 35px;
+    text-align: right;
+    color: var(--accent-secondary);
     font-weight: 600;
 }
 
@@ -236,5 +362,9 @@
 
     .live-demo__viewport {
         position: static;
+    }
+
+    .ld__mp-score-val {
+        font-size: 2.5rem;
     }
 }

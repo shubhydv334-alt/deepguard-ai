@@ -61,11 +61,11 @@ export const analyzeImage = async (imageElement, canvasElement) => {
 export const analyzeVideoFrame = async (videoElement) => {
     if (!modelsLoaded) return null
 
-    // Use TinyFaceDetector for high FPS
+    // Use TinyFaceDetector for high FPS + landmarks + expressions
     const detections = await faceapi.detectAllFaces(
         videoElement,
         new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 })
-    ).withFaceLandmarks()
+    ).withFaceLandmarks().withFaceExpressions()
 
     return detections
 }
