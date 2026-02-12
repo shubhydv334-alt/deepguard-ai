@@ -12,6 +12,9 @@ export default function LiveDemo() {
 
     const startCamera = useCallback(async () => {
         try {
+            const ai = await import('../utils/aiEngine')
+            await ai.loadModels()
+
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { width: 640, height: 480, facingMode: 'user' },
             })
@@ -19,10 +22,11 @@ export default function LiveDemo() {
                 videoRef.current.srcObject = stream
                 setStreaming(true)
                 setError(null)
-                drawOverlay()
+                detectFaces()
             }
         } catch (err) {
-            setError('Camera access denied. Please allow camera permissions.')
+            console.error(err)
+            setError('Camera access denied or model load failed.')
         }
     }, [])
 
@@ -35,105 +39,64 @@ export default function LiveDemo() {
         if (animRef.current) cancelAnimationFrame(animRef.current)
     }, [])
 
-    const drawOverlay = useCallback(() => {
+    const detectFaces = async () => {
+        if (!videoRef.current || !canvasRef.current || videoRef.current.paused || videoRef.current.ended) return
+
+        const ai = await import('../utils/aiEngine')
+        // We use a separate loop for AI inference to not block the UI thread too much
+        // But for simplicity in this prototype, we'll try to run it as fast as possible
+
         const canvas = canvasRef.current
         const video = videoRef.current
-        if (!canvas || !video) return
-        const ctx = canvas.getContext('2d')
-        canvas.width = 640
-        canvas.height = 480
 
-        const draw = () => {
-            ctx.clearRect(0, 0, 640, 480)
-
-            // Face detection rectangle (simulated)
-            const cx = 320 + Math.sin(Date.now() / 2000) * 5
-            const cy = 200 + Math.cos(Date.now() / 3000) * 3
-            const w = 160 + Math.sin(Date.now() / 4000) * 8
-            const h = 190 + Math.cos(Date.now() / 3500) * 8
-
-            ctx.strokeStyle = 'rgba(197, 248, 42, 0.5)'
-            ctx.lineWidth = 1.5
-            ctx.setLineDash([6, 4])
-
-            // Face box
-            ctx.beginPath()
-            const r = 10
-            ctx.moveTo(cx - w / 2 + r, cy - h / 2)
-            ctx.lineTo(cx + w / 2 - r, cy - h / 2)
-            ctx.arcTo(cx + w / 2, cy - h / 2, cx + w / 2, cy - h / 2 + r, r)
-            ctx.lineTo(cx + w / 2, cy + h / 2 - r)
-            ctx.arcTo(cx + w / 2, cy + h / 2, cx + w / 2 - r, cy + h / 2, r)
-            ctx.lineTo(cx - w / 2 + r, cy + h / 2)
-            ctx.arcTo(cx - w / 2, cy + h / 2, cx - w / 2, cy + h / 2 - r, r)
-            ctx.lineTo(cx - w / 2, cy - h / 2 + r)
-            ctx.arcTo(cx - w / 2, cy - h / 2, cx - w / 2 + r, cy - h / 2, r)
-            ctx.stroke()
-            ctx.setLineDash([])
-
-            // Feature points
-            const points = [
-                [cx - 30, cy - 10], [cx + 30, cy - 10],  // Eyes
-                [cx, cy + 15],                              // Nose
-                [cx - 20, cy + 40], [cx + 20, cy + 40],    // Mouth
-                [cx - 50, cy], [cx + 50, cy],               // Temples
-            ]
-
-            points.forEach(([px, py]) => {
-                const jx = px + Math.sin(Date.now() / 1000 + px) * 2
-                const jy = py + Math.cos(Date.now() / 1200 + py) * 2
-                ctx.beginPath()
-                ctx.arc(jx, jy, 3, 0, Math.PI * 2)
-                ctx.fillStyle = 'rgba(197, 248, 42, 0.7)'
-                ctx.fill()
-                ctx.beginPath()
-                ctx.arc(jx, jy, 6, 0, Math.PI * 2)
-                ctx.strokeStyle = 'rgba(197, 248, 42, 0.2)'
-                ctx.lineWidth = 1
-                ctx.stroke()
-            })
-
-            // Connect feature points
-            ctx.beginPath()
-            ctx.strokeStyle = 'rgba(200, 182, 255, 0.12)'
-            ctx.lineWidth = 1
-            for (let i = 0; i < points.length; i++) {
-                for (let j = i + 1; j < points.length; j++) {
-                    ctx.moveTo(points[i][0], points[i][1])
-                    ctx.lineTo(points[j][0], points[j][1])
-                }
-            }
-            ctx.stroke()
-
-            // Label
-            ctx.fillStyle = 'rgba(197, 248, 42, 0.8)'
-            ctx.font = '11px "JetBrains Mono", monospace'
-            ctx.fillText('FACE DETECTED', cx - w / 2, cy - h / 2 - 8)
-
-            // Scan line
-            const scanY = (Date.now() / 15) % 480
-            ctx.beginPath()
-            ctx.moveTo(0, scanY)
-            ctx.lineTo(640, scanY)
-            const grad = ctx.createLinearGradient(0, scanY, 640, scanY)
-            grad.addColorStop(0, 'rgba(197,248,42,0)')
-            grad.addColorStop(0.5, 'rgba(197,248,42,0.1)')
-            grad.addColorStop(1, 'rgba(197,248,42,0)')
-            ctx.strokeStyle = grad
-            ctx.lineWidth = 2
-            ctx.stroke()
-
-            // Fluctuate score
-            setScore(prev => {
-                const delta = (Math.random() - 0.5) * 0.4
-                return Math.max(90, Math.min(99.9, prev + delta))
-            })
-
-            animRef.current = requestAnimationFrame(draw)
+        // Match canvas size to video
+        if (canvas.width !== video.videoWidth) {
+            canvas.width = video.videoWidth
+            canvas.height = video.videoHeight
         }
 
-        draw()
-    }, [])
+        const detect = async () => {
+            if (!video || !video.srcObject) return
+
+            const detections = await ai.analyzeVideoFrame(video)
+
+            const ctx = canvas.getContext('2d')
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+            // Draw detections
+            if (detections && detections.length > 0) {
+                const face = detections[0] // just track the first face
+                const { x, y, width, height } = face.detection.box
+
+                // Draw Box
+                ctx.strokeStyle = '#c5f82a'
+                ctx.lineWidth = 2
+                ctx.strokeRect(x, y, width, height)
+
+                // Draw Landmarks
+                ctx.fillStyle = '#c5f82a'
+                face.landmarks.positions.forEach(p => {
+                    ctx.beginPath()
+                    ctx.arc(p.x, p.y, 2, 0, 2 * Math.PI)
+                    ctx.fill()
+                })
+
+                // Label
+                ctx.fillStyle = '#c5f82a'
+                ctx.font = '16px Courier New'
+                ctx.fillText(`REAL FACE (${Math.round(face.detection.score * 100)}%)`, x, y - 10)
+
+                // Update Score
+                setScore(90 + (face.detection.score * 9)) // Map 0-1 to 90-99
+            } else {
+                setScore(prev => Math.max(50, prev - 1)) // Decay score if no face
+            }
+
+            animRef.current = requestAnimationFrame(detect)
+        }
+
+        detect()
+    }
 
     useEffect(() => {
         return () => stopCamera()

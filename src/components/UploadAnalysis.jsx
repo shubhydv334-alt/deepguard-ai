@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
+import * as faceapi from 'face-api.js'
 import VerificationProof from './VerificationProof'
 import './UploadAnalysis.css'
 
@@ -85,6 +86,8 @@ export default function UploadAnalysis() {
     const [results, setResults] = useState(null)
     const [dragActive, setDragActive] = useState(false)
     const fileInputRef = useRef(null)
+    const canvasRef = useRef(null)
+    const imgRef = useRef(null)
 
     const handleFile = useCallback((f) => {
         if (!f) return
@@ -101,21 +104,84 @@ export default function UploadAnalysis() {
         if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0])
     }, [handleFile])
 
-    const startAnalysis = () => {
+    const startAnalysis = async () => {
+        if (!file) return
+
         setAnalyzing(true)
         setProgress(0)
         setResults(null)
+
+        // Progress simulation while AI loads/processes
         const interval = setInterval(() => {
-            setProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(interval)
-                    setAnalyzing(false)
-                    setResults(generateResults())
-                    return 100
-                }
-                return prev + Math.random() * 3 + 1
-            })
-        }, 60)
+            setProgress(prev => Math.min(prev + 5, 90))
+        }, 100)
+
+        try {
+            // Create image element for analysis
+            const img = new Image()
+            img.src = URL.createObjectURL(file)
+            await new Promise(r => img.onload = r)
+
+            // Run AI Analysis
+            const aiResults = await import('../utils/aiEngine').then(mod => mod.analyzeImage(img))
+
+            clearInterval(interval)
+            setProgress(100)
+
+            // Format results for UI
+            const formattedResults = {
+                overall: aiResults.result.overall.toFixed(1),
+                scores: aiResults.result.details,
+                isDeepfake: aiResults.result.isManipulated,
+                detections: aiResults.detections
+            }
+
+            setAnalyzing(false)
+            setResults(formattedResults)
+
+            // Draw detections if any
+            if (aiResults.detections.length > 0) {
+                drawDetections(aiResults.detections)
+            }
+
+        } catch (error) {
+            console.error(error)
+            clearInterval(interval)
+            setAnalyzing(false)
+            // Fallback to error results or mock
+        }
+    }
+
+    const drawDetections = (detections) => {
+        if (!canvasRef.current || !imgRef.current) return
+
+        const canvas = canvasRef.current
+        const img = imgRef.current
+
+        // Match canvas dimensions to displayed image
+        const displaySize = { width: img.width, height: img.height }
+        faceapi.matchDimensions(canvas, displaySize)
+
+        // Resize detections
+        const resizedDetections = faceapi.resizeResults(detections, displaySize)
+
+        // Draw
+        const ctx = canvas.getContext('2d')
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        resizedDetections.forEach(det => {
+            const box = det.detection.box
+
+            // Draw Box
+            ctx.strokeStyle = '#c5f82a'
+            ctx.lineWidth = 2
+            ctx.strokeRect(box.x, box.y, box.width, box.height)
+
+            // Draw Label
+            ctx.fillStyle = '#c5f82a'
+            ctx.font = 'bold 14px "JetBrains Mono"'
+            ctx.fillText(`${Math.round(det.detection.score * 100)}%`, box.x, box.y - 5)
+        })
     }
 
     const reset = () => {
@@ -124,6 +190,10 @@ export default function UploadAnalysis() {
         setResults(null)
         setProgress(0)
         setAnalyzing(false)
+        if (canvasRef.current) {
+            const ctx = canvasRef.current.getContext('2d')
+            ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+        }
     }
 
     return (
@@ -182,7 +252,10 @@ export default function UploadAnalysis() {
                             <div className="upload__preview-panel">
                                 <div className="upload__preview-wrapper">
                                     {preview && file.type.startsWith('image') && (
-                                        <img src={preview} alt="Preview" className="upload__preview-img" />
+                                        <>
+                                            <img ref={imgRef} src={preview} alt="Preview" className="upload__preview-img" />
+                                            <canvas ref={canvasRef} className="upload__detection-layer" style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }} />
+                                        </>
                                     )}
                                     {preview && file.type.startsWith('video') && (
                                         <video src={preview} controls className="upload__preview-img" />

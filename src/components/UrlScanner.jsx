@@ -8,7 +8,7 @@ export default function UrlScanner() {
     const [results, setResults] = useState([])
     const [progress, setProgress] = useState(0)
 
-    const handleScan = (e) => {
+    const handleScan = async (e) => {
         e.preventDefault()
         if (!url) return
 
@@ -16,26 +16,23 @@ export default function UrlScanner() {
         setProgress(0)
 
         const interval = setInterval(() => {
-            setProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(interval)
-                    setScanning(false)
-                    const isFake = Math.random() > 0.4
-                    setResults([{
-                        url: url.length > 50 ? url.slice(0, 50) + '...' : url,
-                        verdict: isFake ? 'suspicious' : 'likely-authentic',
-                        score: isFake ? Math.floor(Math.random() * 30) + 60 : Math.floor(Math.random() * 20) + 5,
-                        type: isFake
-                            ? ['Facial Inconsistency', 'Audio Mismatch', 'GAN Fingerprint', 'Compression Anomaly'][Math.floor(Math.random() * 4)]
-                            : 'No manipulation detected',
-                        timestamp: 'Just now',
-                    }, ...results].slice(0, 5))
-                    setUrl('')
-                    return 100
-                }
-                return prev + 3
-            })
+            setProgress(prev => Math.min(prev + 3, 90))
         }, 50)
+
+        try {
+            const ai = await import('../utils/aiEngine')
+            const result = await ai.analyzeUrl(url)
+
+            clearInterval(interval)
+            setProgress(100)
+            setScanning(false)
+            setResults([result, ...results].slice(0, 5))
+            setUrl('')
+        } catch (err) {
+            console.error(err)
+            clearInterval(interval)
+            setScanning(false)
+        }
     }
 
     return (

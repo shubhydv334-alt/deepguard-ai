@@ -7,6 +7,7 @@ import UploadAnalysis from './components/UploadAnalysis'
 import UrlScanner from './components/UrlScanner'
 import LiveDemo from './components/LiveDemo'
 import Stats from './components/Stats'
+import Team from './components/Team'
 import Footer from './components/Footer'
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
             <UrlScanner />
             <LiveDemo />
             <Stats />
+            <Team />
             <Footer />
         </>
     )
