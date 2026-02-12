@@ -163,8 +163,8 @@ Every scan generates a **Verification Certificate** containing:
 ## 👥 Team
 | Name               | Role                                         | Key Responsibilities                                                                                                                          |
 | ------------------ | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ved Rane**       | **Full-Stack Lead **                 | Overall system architecture, backend APIs, frontend integration, deployment setup, and end-to-end demo stability                              |
-| **Sushant Zanwar** | **Full-Stack **                      | Feature development, UI integration, comparison views, live webcam flow, performance tuning                                                   |
+| **Ved Rane**       | Full-Stack Lead                | Overall system architecture, backend APIs, frontend integration, deployment setup, and end-to-end demo stability                              |
+| **Sushant Zanwar** | Full-Stack                    | Feature development, UI integration, comparison views, live webcam flow, performance tuning                                                   |
 | **Shubham Yadav**  | **AI Workflow, UI/UX Integration & Testing** | Deepfake detection workflow design, AI result interpretation, UI/UX integration with AI outputs, test cases, validation, and demo reliability |
 
 
