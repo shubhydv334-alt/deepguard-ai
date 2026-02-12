@@ -173,11 +173,23 @@ export default function UploadAnalysis() {
                 })
             } else {
                 // --- IMAGE: direct load ---
+                // --- IMAGE: direct load ---
                 imgForAnalysis = await new Promise((resolve, reject) => {
                     const img = new Image()
                     const objectUrl = URL.createObjectURL(file)
-                    img.onload = () => resolve(img)
+
+                    const timeout = setTimeout(() => {
+                        URL.revokeObjectURL(objectUrl)
+                        reject(new Error('Image loading timed out'))
+                    }, 10000)
+
+                    img.onload = () => {
+                        clearTimeout(timeout)
+                        // Don't revoke yet, we need it for analysis
+                        resolve(img)
+                    }
                     img.onerror = () => {
+                        clearTimeout(timeout)
                         URL.revokeObjectURL(objectUrl)
                         reject(new Error('Failed to load image'))
                     }
@@ -235,35 +247,41 @@ export default function UploadAnalysis() {
     }
 
     const drawDetections = (detections) => {
+        // Safety: Don't draw detections on video files or if elements are missing
+        if (!file || !file.type.startsWith('image')) return
         if (!canvasRef.current || !imgRef.current) return
 
-        const canvas = canvasRef.current
-        const img = imgRef.current
+        try {
 
-        // Match canvas dimensions to displayed image
-        const displaySize = { width: img.width, height: img.height }
-        faceapi.matchDimensions(canvas, displaySize)
+            const canvas = canvasRef.current
+            const img = imgRef.current
 
-        // Resize detections
-        const resizedDetections = faceapi.resizeResults(detections, displaySize)
+            // Match canvas dimensions to displayed image
+            const displaySize = { width: img.width, height: img.height }
+            faceapi.matchDimensions(canvas, displaySize)
 
-        // Draw
-        const ctx = canvas.getContext('2d')
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+            // Resize detections
+            const resizedDetections = faceapi.resizeResults(detections, displaySize)
 
-        resizedDetections.forEach(det => {
-            const box = det.detection.box
+            // Draw
+            const ctx = canvas.getContext('2d')
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-            // Draw Box
-            ctx.strokeStyle = '#c5f82a'
-            ctx.lineWidth = 2
-            ctx.strokeRect(box.x, box.y, box.width, box.height)
+            resizedDetections.forEach(det => {
+                const box = det.detection.box
 
-            // Draw Label
-            ctx.fillStyle = '#c5f82a'
-            ctx.font = 'bold 14px "JetBrains Mono"'
-            ctx.fillText(`${Math.round(det.detection.score * 100)}%`, box.x, box.y - 5)
-        })
+                // Draw Box
+                ctx.strokeStyle = '#c5f82a'
+                ctx.lineWidth = 2
+                ctx.strokeRect(box.x, box.y, box.width, box.height)
+
+                // Draw Label
+                ctx.fillStyle = '#c5f82a'
+                ctx.fillText(`${Math.round(det.detection.score * 100)}%`, box.x, box.y - 5)
+            })
+        } catch (e) {
+            console.warn('Failed to draw detections:', e)
+        }
     }
 
     const reset = () => {
