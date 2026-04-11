@@ -45,20 +45,6 @@ Deepfake content has grown **550%** since 2019. Synthetic identity fraud is proj
 | **Camera** | WebRTC (`getUserMedia`) |
 | **Fonts** | Space Grotesk, Inter, JetBrains Mono |
 
----
-
-## 👥 Team
-
-| Name | Role | Key Responsibilities |
-|---|---|---|
-| **Ved Rane** | Full-Stack Lead | System architecture, backend APIs, frontend integration, deployment, and demo stability. |
-| **Sushant Zanwar** | Full-Stack Developer | Feature development, UI integration, comparison views, webcam flow, and performance. |
-| **Shubham Yadav** | AI Workflow, UI/UX | **Deepfake detection workflow**, AI result interpretation, UI/UX integration, and validation. |
-
-
-
----
-
 
 
 <p align="center">
